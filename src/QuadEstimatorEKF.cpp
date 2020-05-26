@@ -93,9 +93,13 @@ void QuadEstimatorEKF::UpdateFromIMU(V3F accel, V3F gyro)
   // (replace the code below)
   // make sure you comment it out when you add your own code -- otherwise e.g. you might integrate yaw twice
 
-  float predictedPitch = pitchEst + dtIMU * gyro.y;
-  float predictedRoll = rollEst + dtIMU * gyro.x;
-  ekfState(6) = ekfState(6) + dtIMU * gyro.z;	// yaw
+	Quaternion<float> quaternion = Quaternion<float>::FromEuler123_RPY(rollEst, pitchEst, ekfState(6));
+
+	Quaternion<float> q = quaternion.IntegrateBodyRate(gyro, dtIMU);
+
+	float predictedPitch = q.Pitch();
+	float predictedRoll = q.Roll();
+	ekfState(6) = q.Yaw();		// yaw
 
   // normalize yaw to -pi .. pi
   if (ekfState(6) > F_PI) ekfState(6) -= 2.f*F_PI;
@@ -162,6 +166,13 @@ VectorXf QuadEstimatorEKF::PredictState(VectorXf curState, float dt, V3F accel, 
 
   ////////////////////////////// BEGIN STUDENT CODE ///////////////////////////
 
+  V3F body = attitude.Rotate_BtoI(accel);
+  predictedState(0) += predictedState(3) * dt;
+  predictedState(1) += predictedState(4) * dt;
+  predictedState(2) += predictedState(5) * dt;
+  predictedState(3) += body.x * dt;
+  predictedState(4) += body.y * dt;
+  predictedState(5) += body.z * dt - CONST_GRAVITY * dt;;
 
   /////////////////////////////// END STUDENT CODE ////////////////////////////
 
@@ -189,6 +200,15 @@ MatrixXf QuadEstimatorEKF::GetRbgPrime(float roll, float pitch, float yaw)
 
   ////////////////////////////// BEGIN STUDENT CODE ///////////////////////////
 
+  RbgPrime(0, 0) = -1 * cos(pitch)*sin(yaw);
+  RbgPrime(0, 1) = -1 * sin(roll)*sin(pitch)*sin(yaw) - cos(roll)*cos(yaw);
+  RbgPrime(0, 2) = -cos(roll)*sin(pitch)*sin(yaw) + sin(roll)*cos(yaw);
+  RbgPrime(1, 0) = cos(pitch)*cos(yaw);
+  RbgPrime(1, 1) = sin(roll)*sin(pitch)*cos(yaw) - cos(roll)*sin(yaw);
+  RbgPrime(1, 2) = cos(roll)*sin(pitch)*cos(yaw) + sin(roll)*sin(yaw);
+  RbgPrime(2, 0) = 0;
+  RbgPrime(2, 1) = 0;
+  RbgPrime(2, 2) = 0;
 
   /////////////////////////////// END STUDENT CODE ////////////////////////////
 
@@ -235,6 +255,20 @@ void QuadEstimatorEKF::Predict(float dt, V3F accel, V3F gyro)
 
   ////////////////////////////// BEGIN STUDENT CODE ///////////////////////////
 
+  gPrime(0, 3) = dt;
+  gPrime(1, 4) = dt;
+  gPrime(2, 5) = dt;
+  Mat3x3F RbgP;
+
+  for (int i = 0; i < 9; i++) {
+	  RbgP[i] = RbgPrime(i);
+  }
+
+  gPrime(3, 6) = dt * (RbgP * accel).x;
+  gPrime(4, 6) = dt * (RbgP * accel).y;
+  gPrime(5, 6) = dt * (RbgP * accel).z;
+
+  ekfCov = gPrime * ekfCov * gPrime.transpose() + Q;
 
   /////////////////////////////// END STUDENT CODE ////////////////////////////
 
