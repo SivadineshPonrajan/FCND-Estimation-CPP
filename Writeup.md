@@ -29,7 +29,7 @@ Since the attitude estimator is within 0.1 rad for each of the Euler angles for 
 
 #### Task 3: Prediction Step
 
-![Code 1](./images/Capture2.PNG)
+![Code 1](./images/Capture3.PNG)
 
 To complete the prediction step, I updated three functions:
 
@@ -45,7 +45,7 @@ I also updated the QPosXYStd and the QVelXYStd values since it is being used.
 
 #### Task 4: Magnetometer Update
 
-![Code 1](./images/Capture2.PNG)
+![Code 1](./images/Capture4.PNG)
 
 Basically UpdateFromMag function is responsible for updating the magnetometer values. The yaw error is calculated as the difference between the yaw value given by the sensor and the zFromX value. The yaw value is normalised to lie inbetween -pi and pi, just like the one we did it in gyro (Task 2). The hprime vector's last value is updated as 1 and the zFromX value is set as the yaw value in ekfState. Also tuned the QYawStd value.
 
@@ -53,7 +53,7 @@ Basically UpdateFromMag function is responsible for updating the magnetometer va
 
 #### Task 5: Closed Loop + GPS Update
 
-![Code 1](./images/Capture2.PNG)
+![Code 1](./images/Capture5.PNG)
 
 * Initially commented SimIMU.AccelStd and SimIMU.GyroStd in config/11_GPSUpdate.txt file.
 
