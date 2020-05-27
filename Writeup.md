@@ -59,4 +59,11 @@ Basically UpdateFromMag function is responsible for updating the magnetometer va
 
 * In UpdateFromGPS function, the z value is updated with gps sensor measurements. these values are sent to the Update() function. The flight evaluation was perfect thus the Extended Kalman Filter is implemented.
 
-* Then the controller coded in the previous project, is replaced here. Then I started testing it in all scenarios. Everything were passed but in Magnetometer update scenario failed due to the excess path overflow of the waypoint. Then reduced the velocity and passed in all the scenarios.
+---
+
+#### Task 6: Adding Your Controller
+
+* Then the controller coded in my previous project, is replaced here. 
+* Then I started testing it in all scenarios. 
+* Every scenarios were passed but in Magnetometer update scenario failed due to the excess path overflow of the waypoint. 
+* Then reduced the velocity and passed in all the scenarios.
